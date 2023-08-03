@@ -1,9 +1,9 @@
 #!/bin/bash
 
 CIRCUITS_DIR=./circuits
-PHASE1=./powersOfTau28_hez_final_20.ptau
-BUILD_DIR=./build/setMembership
-CIRCUIT_NAME=setMembership
+PHASE1=./powersOfTau28_hez_final_22.ptau
+BUILD_DIR=./build/daddy
+CIRCUIT_NAME=daddy
 
 if [ -f "$PHASE1" ]; then
     echo "Found Phase 1 ptau file"

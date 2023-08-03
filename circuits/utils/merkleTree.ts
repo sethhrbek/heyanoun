@@ -1,7 +1,16 @@
 import { buildPoseidon } from "circomlibjs";
+import fs from "fs";
 
 let poseidon: any;
 let F: any;
+
+function toObject(obj: any) {
+  return JSON.parse(JSON.stringify(obj, (key, value) =>
+    typeof value === 'bigint'
+      ? value.toString()
+      : value // return everything else unchanged
+  ));
+}
 
 //leafAddr: list of all addresses of NFT holders (should be unique) in hex
 //currReaderAdd: addr of reader we are producing a proof for that they are an NFT holder
@@ -17,6 +26,11 @@ export async function createMerkleTree(
   F = poseidon.F;
 
   const tree = buildTreePoseidon(sanitizedLeaves);
+
+  fs.writeFile('tree.txt', JSON.stringify(toObject(tree)), (err) => {
+    if (err) throw err;
+    console.log('The file has been saved!');
+  });
 
   return {
     pathRoot: tree.root,

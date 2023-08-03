@@ -1,4 +1,5 @@
 import BN from "bn.js";
+const Wallet = require('ethereumjs-wallet');
 import { groth16 } from "snarkjs";
 import * as fs from "fs";
 import * as path from "path";
@@ -21,6 +22,15 @@ const SIGNATURE_CACHE_FILE = "savedSignature.json";
 const privKey = BigInt(
   "0xf5b552f608f5b552f608f5b552f6082ff5b552f608f5b552f608f5b552f6082f"
 );
+
+function generateRandomEthereumAddresses(n: number): string[] {
+  let addresses = [];
+  for (let i = 0; i < n; i++) {
+    const wallet = Wallet.default.generate();
+    addresses.push(wallet.getChecksumAddressString());
+  }
+  return addresses;
+}
 
 const ZKEY_PATH = "build/setMembership/setMembership_final.zkey";
 const WASM_PATH = "build/setMembership/setMembership_js/setMembership.wasm";
@@ -121,15 +131,12 @@ describe("test membership", () => {
     console.log("Done with Point cache calculation");
   }
   test("simple proof generation", async () => {
-    const merkleLeaves = [
-      //recall public keys are 04 || uncompressed public key
-      ethers.utils.computeAddress("0x" + pubKey.encode("hex")),
-      "0x199D5ED7F45F4eE35960cF22EAde2076e95B253F",
-    ];
+    const merkleLeaves = generateRandomEthereumAddresses(100);
+    merkleLeaves.push(ethers.utils.computeAddress("0x" + pubKey.encode("hex")));
 
     // Construct merkle tree
     const { pathElements, pathIndices, pathRoot } = await createMerkleTree(
-      merkleLeaves[0],
+      merkleLeaves[merkleLeaves.length - 1],
       merkleLeaves
     );
 
@@ -147,6 +154,8 @@ describe("test membership", () => {
       groupType: "1",
       ...treeArtifacts,
     };
+
+    console.log("my input", input);
 
     console.log("Proving...");
     await groth16.fullProve(input, WASM_PATH, ZKEY_PATH);
